@@ -22,18 +22,23 @@ const editPhotoURL = document.querySelector('.edit-photo');
 const userAvatarElem = document.querySelector('.user-avatar');
 const postsWrapper = document.querySelector('.posts');
 
+const buttonNewPost = document.querySelector('.button-new-post');
+const addPostElem = document.querySelector('.add-post');
+
 const listUsers = [
   {
     id: '01',
     email: 'KitlyaevDD@mail.ru',
     password: '12345',
-    displayName: 'Amateo'
+    displayName: 'Amateo',
+    photo: 'https://64.media.tumblr.com/47a5595091454e702bb399660bb1f2dd/tumblr_o1kt2fD8zM1tm72k3o7_500.jpg',
   },
   {
     id: '02',
     email: 'Kitlyaeved@mail.ru',
     password: '54321',
     displayName: 'Kajed',
+    photo: 'https://st4.depositphotos.com/3922387/31600/i/450/depositphotos_316009904-stock-photo-asian-man-playing-acoustic-guitar.jpg',
   },
 ];
 
@@ -45,7 +50,7 @@ const setUsers = {
      return;
     }
     const user = this.getUser(email);
-    if(user && user.password === password) {
+    if (user && user.password === password) {
       this.authorizedUser(user);
       handler();
     } else {
@@ -54,7 +59,9 @@ const setUsers = {
   },
   logOut(handler) {
     this.user = null;
-    handler();
+    if (handler) {
+      handler();
+    }
   },
   signUp(email, password, handler) {
     if (!regExpValidEmail.test(email)) {
@@ -72,7 +79,9 @@ const setUsers = {
         displayName: email.substring(0, email.indexOf('@'))};
       listUsers.push(user);
       this.authorizedUser(user)
-      handler();
+      if (handler) {
+        handler();
+      }
     } else {
       alert('Пользователь с таким email уже зарегистрирован')
     }
@@ -100,56 +109,83 @@ const setPosts = {
   allPosts: [
     {
       title: 'Заголовок поста',
-      text: 'Наруто саске сакура-бомж Наруто саске сакура-бомж Наруто саске сакура-бомж Наруто саске сакура-бомж Наруто саске сакура-бомж',
+      text: 'Наруто саске сакура-балласт Наруто саске сакура-балласт Наруто саске сакура-балласт Наруто саске сакура-балласт Наруто саске сакура-балласт Наруто саске сакура-балласт Наруто саске сакура-балласт Наруто саске сакура-балласт',
       tags: ['свежее', 'новое', 'горячее', 'мое', 'случайность'],
-      author: 'KitlyaevDD@mail.ru',
+      author: {displayName: 'Amateo', photo: 'https://64.media.tumblr.com/47a5595091454e702bb399660bb1f2dd/tumblr_o1kt2fD8zM1tm72k3o7_500.jpg'},
       date: '11.11.2020, 20:54:00',
       like: 15,
-      comment: 230,
+      comments: 230,
     },
       {
       title: 'Заголовок поста2',
       text: 'Учиха Мадара Саске Итачи Обито Сарада Мадара Саске Итачи Обито СарадаМадара Саске Итачи Обито СарадаМадара Саске Итачи Обито СарадаМадара Саске Итачи Обито СарадаМадара Саске Итачи Обито Сарада',
       tags: ['свежее', 'новое', 'мое', 'случайность'],
-      author: 'Kitlyaeved@mail.ru',
+      author: {displayName: 'Kajed', photo: 'https://st4.depositphotos.com/3922387/31600/i/450/depositphotos_316009904-stock-photo-asian-man-playing-acoustic-guitar.jpg'},
       date: '10.11.2020, 20:54:00',
       like: 45,
-      comment: 22,
+      comments: 22,
+      
     },
     {
       title: 'Заголовок поста3',
       text: 'Хаширама Тобирама Хирузен Минато Цунаде Какаши Наруто',
       tags: ['свежее', 'новое', 'горячее', 'мое', 'случайность'],
-      author: 'KitlyaevDD@mail.ru',
+      author: {displayName: 'Amateo', photo: 'https://64.media.tumblr.com/47a5595091454e702bb399660bb1f2dd/tumblr_o1kt2fD8zM1tm72k3o7_500.jpg'},
       date: '11.11.2020, 20:54:00',
-      like: 15,
-      comment: 230,
+      like: 642,
+      comments: 2300,
     },
-  ]
+  ],
+  addPost(title, text, tags, handler) {
+
+    this.allPosts.unshift({
+      title,
+      text,
+      tags: tags.split(',').map(item => item.trim()),
+      author: {
+        displayName: setUsers.user.displayName,
+        photo: setUsers.user.photo,
+      },
+      date: new Date().toLocaleString(),
+      like: 0,
+      comments: 0,
+    })
+
+    if (handler) {
+      handler();
+    }
+  }
 };
 
 const toggleAuthDom = () => {
   const user = setUsers.user;
   console.log('user: ', user);
 
-  if(user) {
+  if (user) {
     loginElem.style.display = 'none';
     userElem.style.display = '';
     userNameElem.textContent = user.displayName;
     userAvatarElem.src = user.photo || userAvatarElem.src;
+    buttonNewPost.classList.add('visible');
   } else {
     loginElem.style.display = '';
     userElem.style.display = 'none';
+    buttonNewPost.classList.remove('visible');
+    addPostElem.classList.remove('visible');
+    postsWrapper.classList.add('visible');
   }
 };
 
-
+const showAddPost = () => {
+  addPostElem.classList.add('visible');
+  postsWrapper.classList.remove('visible');
+}
 
 const showAllPosts = () => {
 
   let postsHTML = '';
 
-  setPosts.allPosts.forEach(({ title, text, date, }) => {
+  setPosts.allPosts.forEach(({ title, text, date, tags, like, comments, author}) => {
 
     postsHTML += `
     <section class="post">
@@ -163,7 +199,7 @@ const showAllPosts = () => {
             вопроса ведущими о решила одна алфавит! </p>
           <p class="post-text">${text}</p>
           <div class="tags">
-            <a href="#" class="tag">#${tags}</a>
+            ${tags.map(tag => `<a href="#" class="tag">#${tag}</a>`)}
           </div>
           <!-- /.tags -->
         </div>
@@ -174,13 +210,13 @@ const showAllPosts = () => {
               <svg width="19" height="20" class="icon icon-like">
                 <use xlink:href="img/icons.svg#like"></use>
               </svg>
-              <span class="likes-counter">26</span>
+              <span class="likes-counter">${like}</span>
             </button>
             <button class="post-button comments">
               <svg width="21" height="21" class="icon icon-comment">
                 <use xlink:href="img/icons.svg#comment"></use>
               </svg>
-              <span class="comments-counter">157</span>
+              <span class="comments-counter">${comments}</span>
             </button>
             <button class="post-button save">
               <svg width="19" height="19" class="icon icon-save">
@@ -196,10 +232,10 @@ const showAllPosts = () => {
           <!-- /.post-buttons -->
           <div class="post-author">
             <div class="author-about">
-              <a href="#" class="author-username">arteislamov</a>
+              <a href="#" class="author-username">${author.displayName}</a>
               <span class="post-time">5 минут назад</span>
             </div>
-            <a href="#" class="author-link"><img src="img/avatar.jpeg" alt="avatar" class="author-avatar"></a>
+            <a href="#" class="author-link"><img src=${author.photo || "img/avatar.jpeg"} alt="avatar" class="author-avatar"></a>
           </div>
           <!-- /.post-author -->
         </div>
@@ -210,6 +246,9 @@ const showAllPosts = () => {
 
 
   postsWrapper.innerHTML = postsHTML;
+
+  addPostElem.classList.remove('visible');
+  postsWrapper.classList.add('visible');
 };
 
 const init = () => {
@@ -253,6 +292,30 @@ const init = () => {
   menu.classList.toggle('visible');
 })
 
+  buttonNewPost.addEventListener('click', event => {
+    event.preventDefault();
+    showAddPost();
+  });
+
+  addPostElem.addEventListener('submit', event => {
+    event.preventDefault();
+    console.dir(addPostElem);
+    const { title, text, tags }  = addPostElem.elements;
+
+    if (title.value.length < 6) {
+      alert('Слишком короткий заголовок');
+      return;
+    }
+    if (text.value.length < 50) {
+      alert('Слишком короткий пост');
+      return;
+    }
+
+    setPosts.addPost(title.value, text.value, tags.value, showAllPosts);
+    addPostElem.classList.remove('visible');
+    addPostElem.reset();
+  })
+
   showAllPosts();
   toggleAuthDom();
 }
@@ -260,5 +323,3 @@ const init = () => {
 document.addEventListener('DOMContentLoaded', () => {
   init();
 })
-
-
